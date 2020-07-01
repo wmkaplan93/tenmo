@@ -24,22 +24,26 @@ public class UserService {
         BASE_URL = url;
     }
 	
+    
+// need to instantiate AUTH_TOKEN
+    
     //get balance
     public String getUserBalance(AuthenticatedUser user) throws UserServiceException {
     	String balance = "";
     	Account account = null;
     	
     	
+// pass around whole account, then get the balance
+    	//System.out.print account.getBalance()
         try {
-            account = restTemplate.exchange(BASE_URL + "/" +user.getUser().getUsername() + "/balance", HttpMethod.GET, makeAuthEntity(user), Account.class).getBody();
+            account = restTemplate.exchange(BASE_URL + "/" + user.getUser().getUsername() + "/balance", HttpMethod.GET, makeAuthEntity(user), Account.class).getBody();
             balance = account.toString();
         } catch (RestClientResponseException ex) {
             throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
         }
         return balance;
     }
-	
-	
+//we need to get AuthToken from current Authenticated user	
 	
     private HttpEntity<AuthenticatedUser> makeUserEntity(AuthenticatedUser user) {
         HttpHeaders headers = new HttpHeaders();

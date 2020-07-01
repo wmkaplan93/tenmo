@@ -1,5 +1,7 @@
 package com.techelevator.tenmo.controller;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.techelevator.tenmo.dao.AccountDAO;
 import com.techelevator.tenmo.dao.UserDAO;
+import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.security.jwt.TokenProvider;
 
 @RestController
@@ -25,10 +29,20 @@ public class UserController {
         this.accountDAO = accountDAO;
     }
     
+    @RequestMapping(path = "{username}/", method = RequestMethod.GET)
+    public User getUserByUsername(@PathVariable String username) {
+    	return userDAO.findByUsername(username);
+    }
     
-    @RequestMapping(path = "/{username}/balance", method = RequestMethod.GET)
+    
+    @RequestMapping(path = "{username}/account/balance", method = RequestMethod.GET)
     public Double getBalance(@PathVariable String username) {
         return accountDAO.returnBalance(userDAO.findIdByUsername(username));
+    }
+    
+    @RequestMapping(path = "{username}/account/", method = RequestMethod.GET)
+    public Account getUserAccount(@PathVariable String username) throws AccountNotFoundException {
+    	return accountDAO.returnAccountByUsername(userDAO.findIdByUsername(username));
     }
     
     

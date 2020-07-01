@@ -6,7 +6,9 @@ public class Account {
 	private Long userId;
 	private Double balance;
 	
-	public Account(long accountId, long userId, double balance) {
+	public Account() { }
+	
+	public Account(Long accountId, Long userId, Double balance) {
 		this.accountId = accountId;
 		this.userId = userId;
 		this.balance = balance;
