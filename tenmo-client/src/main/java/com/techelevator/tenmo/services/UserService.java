@@ -25,12 +25,13 @@ public class UserService {
     }
 	
     //get balance
-    public String getUserBalance(AuthenticatedUser authenticatedUser) throws UserServiceException {
+    public String getUserBalance(AuthenticatedUser user) throws UserServiceException {
     	String balance = "";
     	Account account = null;
     	
+    	
         try {
-            account = restTemplate.exchange(BASE_URL + "/" + authenticatedUser.getUser().getUsername() + "/balance", HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+            account = restTemplate.exchange(BASE_URL + "/" +user.getUser().getUsername() + "/balance", HttpMethod.GET, makeAuthEntity(user), Account.class).getBody();
             balance = account.toString();
         } catch (RestClientResponseException ex) {
             throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
@@ -40,17 +41,17 @@ public class UserService {
 	
 	
 	
-    private HttpEntity<User> makeUserEntity(User user) {
+    private HttpEntity<AuthenticatedUser> makeUserEntity(AuthenticatedUser user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(AUTH_TOKEN);
-        HttpEntity<User> entity = new HttpEntity<>(user, headers);
+        headers.setBearerAuth(user.getToken());
+        HttpEntity<AuthenticatedUser> entity = new HttpEntity<>(user, headers);
         return entity;
     }
 	
-    private HttpEntity makeAuthEntity() {
+    private HttpEntity makeAuthEntity(AuthenticatedUser user) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(AUTH_TOKEN);
+        headers.setBearerAuth(user.getToken());
         HttpEntity entity = new HttpEntity<>(headers);
         return entity;
     }
