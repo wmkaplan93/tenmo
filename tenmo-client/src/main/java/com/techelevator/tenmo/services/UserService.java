@@ -25,15 +25,15 @@ public class UserService {
     //get balance
     public String getUserBalance(String username) throws UserServiceException {
     	String balance = "";
-    	
-//        User user = null;
-//        makeUserEntity(user);
+    	Account account = null;
+
         try {
-            balance = restTemplate.exchange(BASE_URL + "/" + username, HttpMethod.GET, makeAuthEntity(), User.class).getBody().;
+            Account = restTemplate.exchange(BASE_URL + "/" + username + "/account", HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+            balance = account.toString();
         } catch (RestClientResponseException ex) {
             throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
         }
-        return user;
+        return balance;
     }
 	
 	
