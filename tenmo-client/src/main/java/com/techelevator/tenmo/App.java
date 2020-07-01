@@ -72,12 +72,12 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewCurrentBalance() {
 		try {
-			userService.getUserBalance("wmkaplan");
+			userService.getUserBalance(currentUser);
 		} catch (UserServiceException e) {
 			e.printStackTrace();
-		}
-		// TODO Auto-generated method stub
-		
+		} catch (NullPointerException e) {
+			System.out.println("Please try again. (NullPointer)");
+		}		
 	}
 
 	private void viewTransferHistory() {
