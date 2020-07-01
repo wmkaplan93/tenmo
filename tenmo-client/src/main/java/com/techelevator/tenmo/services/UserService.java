@@ -7,6 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import com.techelevator.tenmo.models.Account;
+import com.techelevator.tenmo.models.AuthenticatedUser;
 import com.techelevator.tenmo.models.User;
 import com.techelevator.view.ConsoleService;
 
@@ -23,17 +25,17 @@ public class UserService {
     }
 	
     //get balance
-    public String getUserBalance(String username) throws UserServiceException {
+    public String getUserBalance(AuthenticatedUser authenticatedUser) throws UserServiceException {
     	String balance = "";
+    	Account account = null;
     	
-//        User user = null;
-//        makeUserEntity(user);
         try {
-            balance = restTemplate.exchange(BASE_URL + "/" + username, HttpMethod.GET, makeAuthEntity(), User.class).getBody().;
+            account = restTemplate.exchange(BASE_URL + "/" + authenticatedUser.getUser().getUsername() + "/balance", HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+            balance = account.toString();
         } catch (RestClientResponseException ex) {
             throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
         }
-        return user;
+        return balance;
     }
 	
 	
