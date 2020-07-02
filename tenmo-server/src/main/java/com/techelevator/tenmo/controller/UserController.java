@@ -41,7 +41,7 @@ public class UserController {
         return accountDAO.returnBalance(userDAO.findIdByUsername(username));
     }
     
-    @RequestMapping(path = "{username}/account/", method = RequestMethod.GET)
+    @RequestMapping(path = "{username}/account", method = RequestMethod.GET)
     public Account getUserAccount(@PathVariable String username) throws AccountNotFoundException {
     	return accountDAO.returnAccountByUsername(userDAO.findIdByUsername(username));
     }
