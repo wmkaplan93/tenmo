@@ -17,6 +17,9 @@ import com.techelevator.tenmo.model.User;
 public class AccountSqlDAO implements AccountDAO{
 	
     private JdbcTemplate jdbcTemplate;
+    public AccountSqlDAO(JdbcTemplate jdbcTemplate) {
+    	this.jdbcTemplate = jdbcTemplate;
+    }
 //SELECT * FROM accounts
     //then get the balance, if passing around account, queryForRowSet()  
     //look in HW
