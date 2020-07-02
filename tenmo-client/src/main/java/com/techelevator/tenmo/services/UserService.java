@@ -1,9 +1,13 @@
 package com.techelevator.tenmo.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,35 +26,50 @@ public class UserService {
     public UserService(String url) {
         BASE_URL = url;
     }
-	
-    
-// need to instantiate AUTH_TOKEN
-    
-    //get balance
-    public Double getUserBalance(AuthenticatedUser user) throws UserServiceException {
-    	System.out.println("Do I make it to userService");
 
-    	// pass around whole account, then get the balance
-    	//System.out.print account.getBalance()
+    public Double getUserBalance(AuthenticatedUser user) throws UserServiceException {
+    	
+
         try {
-        	System.out.println("Made it to the try block");
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(user.getToken());
-            HttpEntity<AuthenticatedUser> entity = new HttpEntity<>(user, headers);
+            headers.setBearerAuth(AUTH_TOKEN);
+            HttpEntity entity = new HttpEntity<>( headers);
             Account account = restTemplate.exchange(BASE_URL + user.getUser().getUsername() + "/account", 
-            		HttpMethod.GET, entity, Account.class).getBody();
-            System.out.println("made it past the account generation");
+            		HttpMethod.GET, 
+            		entity, 
+            		Account.class).getBody();
             Double balance = account.getBalance();
             System.out.println("Current Balance: " + balance);
             return balance;
-        } catch (RestClientResponseException ex) {
+         } catch (RestClientResponseException ex) {
             throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
         }
-//        System.out.println("Current Balance: " + balance);
-//        return balance;
     }
-//we need to get AuthToken from current Authenticated user	
+
+    
+    public boolean sendBucks(AuthenticatedUser user) {
+    	//call get all users
+    	
+    	//check if enough to send 
+    	
+    	//call add bucks to destination user
+    	
+    	//call subtract bucks on current user 
+    	
+    	
+		return false;	
+    }
+    
+    //call before sendBucks
+    public void printAllUsers() {
+    	UserSqlDAO user = new UserSqlDao; 
+    	
+//    	 List<User> users = new ArrayList<>();
+//         while(results.next()) {
+//        	 
+//         }
+    }
 	
     private HttpEntity<AuthenticatedUser> makeUserEntity(AuthenticatedUser user) {
         HttpHeaders headers = new HttpHeaders();
