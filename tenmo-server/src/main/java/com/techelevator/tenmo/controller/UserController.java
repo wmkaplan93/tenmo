@@ -38,7 +38,7 @@ public class UserController {
     @RequestMapping(path = "{username}/account/balance", method = RequestMethod.GET)
     public Double getBalance(@PathVariable String username) {
     	//get account(SQL query), then call return balance
-        return accountDAO.returnBalance(userDAO.findIdByUsername(username)).getBalance();
+        return accountDAO.returnBalance(userDAO.findIdByUsername(username));
     }
     
     @RequestMapping(path = "{username}/account/", method = RequestMethod.GET)
