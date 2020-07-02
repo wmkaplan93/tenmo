@@ -2,7 +2,9 @@ package com.techelevator.tenmo.dao;
 
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -31,15 +33,29 @@ public class UserSqlDAO implements UserDAO {
     @Override
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
+        Map<Long, String> userMap = new HashMap<Long, String>();
         String sql = "select * from users";
 
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
         while(results.next()) {
             User user = mapRowToUser(results);
             users.add(user);
+            userMap.put(user.getId(), user.getUsername());   
         }
-
         return users;
+    }
+    
+    @Override
+    public Map<Long, String> findAllMap() {
+    	Map<Long, String> userMap = new HashMap<Long, String>();
+        String sql = "select * from users";
+
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
+        while(results.next()) {
+            User user = mapRowToUser(results);
+            userMap.put(user.getId(), user.getUsername());   
+        }
+        return userMap;
     }
 
     @Override
@@ -51,6 +67,17 @@ public class UserSqlDAO implements UserDAO {
         }
         throw new UsernameNotFoundException("User " + username + " was not found.");
     }
+    
+    @Override
+    public void printAll(List<User> users) {
+		System.out.println("------------------------------");
+		System.out.println("User ID          Username");
+		System.out.println("------------------------------");
+		for (User user : users) {
+			System.out.println(user.getId()  + "                " + user.getUsername());
+		}
+		System.out.println("------------------------------");
+    }	
 
     @Override
     public boolean create(String username, String password) {

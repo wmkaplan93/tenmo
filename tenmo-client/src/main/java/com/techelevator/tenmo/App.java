@@ -1,5 +1,7 @@
 package com.techelevator.tenmo;
 
+import java.util.Map;
+
 import com.techelevator.tenmo.models.AuthenticatedUser;
 import com.techelevator.tenmo.models.UserCredentials;
 import com.techelevator.tenmo.services.AuthenticationService;
@@ -94,8 +96,16 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
-		
+    	userService.listUsers();
+    	Map<Long, String> mapUsers = userService.mapUsers();
+    	System.out.println("Please select a User ID to send TE Bucks to (1, 2, etc): ");
+    	String userIn = console.getUserInput("User ID: ");
+    	if(mapUsers.containsKey(userIn)) {
+    		userService.sendBucks(currentUser);
+    	} else {
+        	System.out.println("Please enter a valid User ID.");
+        	sendBucks();
+    	}
 	}
 
 	private void requestBucks() {

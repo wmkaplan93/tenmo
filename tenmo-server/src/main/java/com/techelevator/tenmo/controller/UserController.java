@@ -1,5 +1,9 @@
 package com.techelevator.tenmo.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import javax.security.auth.login.AccountNotFoundException;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,34 +50,25 @@ public class UserController {
     	return accountDAO.returnAccountByUsername(userDAO.findIdByUsername(username));
     }
     
-    
-//    static class LoginResponse {
-//
-//        private String token;
-//        private User user;
-//
-//        LoginResponse(String token, User user) {
-//            this.token = token;
-//            this.user = user;
-//        }
-//
-//        @JsonProperty("token")
-//        String getToken() {
-//            return token;
-//        }
-//
-//        void setToken(String token) {
-//            this.token = token;
-//        }
-//
-//        @JsonProperty("user")
-//		public User getUser() {
-//			return user;
-//		}
-//
-//		public void setUser(User user) {
-//			this.user = user;
-//		}
+//    @RequestMapping(path = "{username}/transfer", method = RequestMethod.POST)
+//    public
+//    @RequestMapping(path = "{username}/transfer", method = RequestMethod.GET)
+//    public List<User> getUsersForTransfer(@PathVariable String username) {
+//    	return userDAO.findAll();
 //    }
+    
+    @RequestMapping(path = "allUsers", method = RequestMethod.GET)
+    public void getAllUsers() {
+    	List<User> users = userDAO.findAll();
+    	userDAO.printAll(users);
+//    	Map<Long, String> userMap = userDAO.findAllMap();
+    }
+    
+    @RequestMapping(path = "mapUsers", method = RequestMethod.GET)
+    public Map<Long, String> mapUsers() {
+    	Map<Long, String> userMap = userDAO.findAllMap();
+    	return userMap;
+    }
+    
 
 }
