@@ -35,9 +35,6 @@ public class AccountSqlDAO implements AccountDAO{
 				a = mapRowToAccount(results);
 			}
         return a.getBalance();
-        		
-	//also queryforrowset?
-        //map to row set
 	}
 	
     @Override
