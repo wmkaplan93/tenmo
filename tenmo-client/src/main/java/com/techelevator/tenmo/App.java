@@ -30,13 +30,14 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     private UserService userService;
 
     public static void main(String[] args) {
-    	App app = new App(new ConsoleService(System.in, System.out), new AuthenticationService(API_BASE_URL));
+    	App app = new App(new ConsoleService(System.in, System.out), new AuthenticationService(API_BASE_URL), new UserService(API_BASE_URL));
     	app.run();
     }
 
-    public App(ConsoleService console, AuthenticationService authenticationService) {
+    public App(ConsoleService console, AuthenticationService authenticationService, UserService userService) {
 		this.console = console;
 		this.authenticationService = authenticationService;
+		this.userService = userService;
 	}
 
 	public void run() {
@@ -72,9 +73,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewCurrentBalance() {
 		try {
+			System.out.println("I got this far");
 			userService.getUserBalance(currentUser);
+			System.out.println("Also this far");
 		} catch (UserServiceException e) {
-			e.printStackTrace();
+			System.out.println("User Service Excepton");
 		} catch (NullPointerException e) {
 			System.out.println("Please try again. (NullPointer)");
 		}		

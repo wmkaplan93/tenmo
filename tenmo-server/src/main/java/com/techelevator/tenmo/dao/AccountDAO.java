@@ -9,7 +9,7 @@ import com.techelevator.tenmo.model.Account;
 public interface AccountDAO {
 	//account_id, user_id, balance
 	
-	Account returnBalance(long userId);
+	Double returnBalance(long userId);
 		
     public List<Account> findAll();
     

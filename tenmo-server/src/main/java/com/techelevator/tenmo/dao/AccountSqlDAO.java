@@ -24,14 +24,14 @@ public class AccountSqlDAO implements AccountDAO{
     
     
 	@Override
-	public Account returnBalance(long userId) {
+	public Double returnBalance(long userId) {
 		Account a = new Account();
 		
 		SqlRowSet results = jdbcTemplate.queryForRowSet("SELECT * FROM accounts WHERE user_id = ?", double.class, userId);
 			if (results.next()) {
 				a = mapRowToAccount(results);
 			}
-        return a;
+        return a.getBalance();
         		
 	//also queryforrowset?
         //map to row set
