@@ -76,6 +76,16 @@ public class AccountSqlDAO implements AccountDAO{
         throw new AccountNotFoundException("");
     }
     
+    @Override
+    public Account getAccountByAccountId(long accountId) throws AccountNotFoundException {
+    	for (Account account : this.findAll()) {
+    		if( account.getAccountId() == accountId) {
+    			return account;
+    		}
+    	}
+    	throw new AccountNotFoundException();
+    }
+    
     private Account mapRowToAccount(SqlRowSet rs) {
         Account account = new Account();
         account.setAccountId(rs.getLong("account_id"));
