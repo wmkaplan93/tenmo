@@ -15,12 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.techelevator.locations.exception.LocationNotFoundException;
-import com.techelevator.locations.models.Location;
 import com.techelevator.tenmo.model.User;
-import com.techelevator.tenmo.models.Account;
-import com.techelevator.tenmo.models.AuthenticatedUser;
-import com.techelevator.tenmo.services.UserServiceException;
 
 @Service
 public class UserSqlDAO implements UserDAO {

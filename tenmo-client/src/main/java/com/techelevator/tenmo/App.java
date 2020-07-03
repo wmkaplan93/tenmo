@@ -80,7 +80,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewCurrentBalance() {
 		try {
-			System.out.println("Current Balance: " + userService.getUserBalance(currentUser));
+			System.out.println("Current Balance: " + userService.getUserBalance(currentUser.getUser()));
 		} catch (UserServiceException e) {
 			System.out.println("User Service Excepton");
 		} catch (NullPointerException e) {
@@ -99,7 +99,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void sendBucks(AuthenticatedUser user) throws UserServiceException {
-    	userService.listUsers();
+    	Map<Long, String> newUsers = userService.listUsers();
     	Map<Long, User> mapUsers = userService.mapUsers();
     	System.out.println("Please select a User ID to send TE Bucks to (1, 2, etc): ");
     	String userIn = console.getUserInput("User ID: ");
@@ -108,18 +108,20 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     			System.out.println("Sorry, you cannot send money to yourself.");
     			sendBucks(user);
     		} else {
+    			String userName = newUsers.get(userIn);
 	    		Double sendAmt = 99999999.9;
-	    		while (sendAmt > userService.getUserBalance(currentUser) || sendAmt <= 0) {
-	    			System.out.println("Current balance: " + userService.getUserBalance(currentUser));
+	    		while (sendAmt > userService.getUserBalance(currentUser.getUser()) || sendAmt <= 0) {
+	    			System.out.println("Current balance: " + userService.getUserBalance(currentUser.getUser()));
 	    			sendAmt = Double.parseDouble(console.getUserInput("How much would you like to send? (100, 250, etc) "));
-	        		if (sendAmt > userService.getUserBalance(currentUser)) {
+	        		if (sendAmt > userService.getUserBalance(currentUser.getUser())) {
 	        			System.out.println("Please enter an amount less than or equal to your current balance.");
 	        		} else if (sendAmt <= 0) {
 	        			System.out.println("Please enter an amount greater than 0.");
 	        		} else {
-	        			sendAmt = userService.getUserBalance(currentUser) - sendAmt;
-	        			long toUser = Long.parseLong(userIn);
-	            		userService.sendBucks(currentUser, sendAmt, toUser);
+	        			//Double lessAmt = userService.getUserBalance(currentUser.getUser()) - sendAmt;
+//	        			Double moreAmt = userService.getUserBalance(user)
+	        			long toUserId = Long.parseLong(userIn);
+	            		userService.sendBucks(currentUser, sendAmt, toUserId, userName);
 	        		}
 	    		}
     		}

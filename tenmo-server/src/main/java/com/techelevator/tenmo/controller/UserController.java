@@ -51,9 +51,10 @@ public class UserController {
     }
     
     @RequestMapping(path = "{userId}/account", method = RequestMethod.PUT)
-    public void minusBucks(@RequestBody Account account, Double balance, @PathVariable Long userId)
+    public void minusBucks(@RequestBody Account account, @PathVariable Long userId)
     	throws AccountNotFoundException {
     	account.setUserId(userId);
+    	Double balance = account.getBalance();
     	accountDAO.minusBucks(account, balance);
     }
     	
