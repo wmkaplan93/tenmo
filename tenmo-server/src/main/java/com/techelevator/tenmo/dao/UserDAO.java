@@ -17,5 +17,5 @@ public interface UserDAO {
     
     void printAll(List<User> findAll);
 
-	Map<Long, String> findAllMap();
+	Map<Long, User> findAllMap();
 }

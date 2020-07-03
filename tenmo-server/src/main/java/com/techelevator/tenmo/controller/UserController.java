@@ -39,12 +39,12 @@ public class UserController {
     }
     
     
-    @RequestMapping(path = "{username}/account/balance", method = RequestMethod.GET)
-    public Double getBalance(@PathVariable String username) {
-    	//get account(SQL query), then call return balance
-        return accountDAO.returnBalance(userDAO.findIdByUsername(username));
-    }
-    
+//    @RequestMapping(path = "{username}/account/balance", method = RequestMethod.GET)
+//    public Double getBalance(@PathVariable String username) {
+//    	//get account(SQL query), then call return balance
+//        return accountDAO.returnBalance(userDAO.findIdByUsername(username));
+//    }
+//    
     @RequestMapping(path = "{username}/account", method = RequestMethod.GET)
     public Account getUserAccount(@PathVariable String username) throws AccountNotFoundException {
     	return accountDAO.returnAccountByUsername(userDAO.findIdByUsername(username));
@@ -65,9 +65,20 @@ public class UserController {
     }
     
     @RequestMapping(path = "mapUsers", method = RequestMethod.GET)
-    public Map<Long, String> mapUsers() {
-    	Map<Long, String> userMap = userDAO.findAllMap();
+    public Map<Long, User> mapUsers() {
+    	Map<Long, User> userMap = userDAO.findAllMap();
     	return userMap;
+    }
+    
+    @RequestMapping(path = "{username}/account/sendMoney", method = RequestMethod.PUT)
+    public Account sendMoney(@RequestBody Account account, @PathVariable String username)
+    	throws AccountNotFoundException {
+    return userDAO.
+    }
+    
+    @RequestMapping(path = "{username}/account/addMoney", method = RequestMethod.PUT)
+    public void addMoney() {
+    	
     }
     
 

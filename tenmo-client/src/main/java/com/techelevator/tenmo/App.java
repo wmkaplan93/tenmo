@@ -3,6 +3,7 @@ package com.techelevator.tenmo;
 import java.util.Map;
 
 import com.techelevator.tenmo.models.AuthenticatedUser;
+import com.techelevator.tenmo.models.User;
 import com.techelevator.tenmo.models.UserCredentials;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
@@ -61,7 +62,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			} else if(MAIN_MENU_OPTION_VIEW_PENDING_REQUESTS.equals(choice)) {
 				viewPendingRequests();
 			} else if(MAIN_MENU_OPTION_SEND_BUCKS.equals(choice)) {
-				sendBucks();
+				try {
+					sendBucks(currentUser);
+				} catch (UserServiceException e) {
+					e.printStackTrace();
+				}
 			} else if(MAIN_MENU_OPTION_REQUEST_BUCKS.equals(choice)) {
 				requestBucks();
 			} else if(MAIN_MENU_OPTION_LOGIN.equals(choice)) {
@@ -75,9 +80,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewCurrentBalance() {
 		try {
-			System.out.println("I got this far");
-			userService.getUserBalance(currentUser);
-			System.out.println("Also this far");
+			System.out.println("Current Balance: " + userService.getUserBalance(currentUser));
 		} catch (UserServiceException e) {
 			System.out.println("User Service Excepton");
 		} catch (NullPointerException e) {
@@ -95,16 +98,33 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		
 	}
 
-	private void sendBucks() {
+	private void sendBucks(AuthenticatedUser user) throws UserServiceException {
     	userService.listUsers();
-    	Map<Long, String> mapUsers = userService.mapUsers();
+    	Map<Long, User> mapUsers = userService.mapUsers();
     	System.out.println("Please select a User ID to send TE Bucks to (1, 2, etc): ");
     	String userIn = console.getUserInput("User ID: ");
     	if(mapUsers.containsKey(userIn)) {
-    		userService.sendBucks(currentUser);
+    		if(Integer.parseInt(userIn) == (user.getUser().getId())) {
+    			System.out.println("Sorry, you cannot send money to yourself.");
+    			sendBucks(user);
+    		} else {
+	    		Double sendAmt = 99999999.9;
+	    		while (sendAmt > userService.getUserBalance(currentUser) || sendAmt <= 0) {
+	    			System.out.println("Current balance: " + userService.getUserBalance(currentUser));
+	    			sendAmt = Double.parseDouble(console.getUserInput("How much would you like to send? (100, 250, etc) "));
+	        		if (sendAmt > userService.getUserBalance(currentUser)) {
+	        			System.out.println("Please enter an amount less than or equal to your current balance.");
+	        		} else if (sendAmt <= 0) {
+	        			System.out.println("Please enter an amount greater than 0.");
+	        		} else {
+	        			long toUser = Long.parseLong(userIn);
+	            		userService.sendBucks(currentUser, sendAmt, toUser);
+	        		}
+	    		}
+    		}
     	} else {
         	System.out.println("Please enter a valid User ID.");
-        	sendBucks();
+        	sendBucks(currentUser);
     	}
 	}
 
