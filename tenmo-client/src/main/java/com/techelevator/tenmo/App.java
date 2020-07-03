@@ -89,8 +89,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
-		
+		userService.myTransfers(currentUser);		
 	}
 
 	private void viewPendingRequests() {
@@ -99,7 +98,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void sendBucks(AuthenticatedUser user) throws UserServiceException {
-    	Map<Long, String> newUsers = userService.listUsers();
+    	Map<String, String> newUsers = userService.listUsers();
     	Map<Long, User> mapUsers = userService.mapUsers();
     	System.out.println("Please select a User ID to send TE Bucks to (1, 2, etc): ");
     	String userIn = console.getUserInput("User ID: ");

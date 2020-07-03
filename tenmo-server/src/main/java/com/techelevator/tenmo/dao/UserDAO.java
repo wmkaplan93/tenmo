@@ -18,4 +18,6 @@ public interface UserDAO {
     void printAll(List<User> findAll);
 
 	Map<Long, User> findAllMap();
+
+	String usernameFromAccountId(long accountId);
 }

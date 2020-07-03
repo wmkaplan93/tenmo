@@ -17,5 +17,7 @@ public interface AccountDAO {
 
 	Account returnAccountByUsername(int userId) throws AccountNotFoundException;
 
-	Double minusBucks(Account account, Double balance);    
+	Double minusBucks(Account account, Double balance);
+
+	Account getAccountByAccountId(long accountId) throws AccountNotFoundException;    
 }
