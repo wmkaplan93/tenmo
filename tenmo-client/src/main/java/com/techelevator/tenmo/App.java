@@ -117,6 +117,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	        		} else if (sendAmt <= 0) {
 	        			System.out.println("Please enter an amount greater than 0.");
 	        		} else {
+	        			sendAmt = userService.getUserBalance(currentUser) - sendAmt;
 	        			long toUser = Long.parseLong(userIn);
 	            		userService.sendBucks(currentUser, sendAmt, toUser);
 	        		}

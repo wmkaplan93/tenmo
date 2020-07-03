@@ -8,6 +8,7 @@ import javax.security.auth.login.AccountNotFoundException;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,31 +38,10 @@ public class UserController {
     public User getUserByUsername(@PathVariable String username) {
     	return userDAO.findByUsername(username);
     }
-    
-    
-//    @RequestMapping(path = "{username}/account/balance", method = RequestMethod.GET)
-//    public Double getBalance(@PathVariable String username) {
-//    	//get account(SQL query), then call return balance
-//        return accountDAO.returnBalance(userDAO.findIdByUsername(username));
-//    }
-//    
+      
     @RequestMapping(path = "{username}/account", method = RequestMethod.GET)
     public Account getUserAccount(@PathVariable String username) throws AccountNotFoundException {
     	return accountDAO.returnAccountByUsername(userDAO.findIdByUsername(username));
-    }
-    
-//    @RequestMapping(path = "{username}/transfer", method = RequestMethod.POST)
-//    public
-//    @RequestMapping(path = "{username}/transfer", method = RequestMethod.GET)
-//    public List<User> getUsersForTransfer(@PathVariable String username) {
-//    	return userDAO.findAll();
-//    }
-    
-    @RequestMapping(path = "allUsers", method = RequestMethod.GET)
-    public void getAllUsers() {
-    	List<User> users = userDAO.findAll();
-    	userDAO.printAll(users);
-//    	Map<Long, String> userMap = userDAO.findAllMap();
     }
     
     @RequestMapping(path = "mapUsers", method = RequestMethod.GET)
@@ -70,16 +50,23 @@ public class UserController {
     	return userMap;
     }
     
-    @RequestMapping(path = "{username}/account/sendMoney", method = RequestMethod.PUT)
-    public Account sendMoney(@RequestBody Account account, @PathVariable String username)
+    @RequestMapping(path = "{userId}/account", method = RequestMethod.PUT)
+    public void minusBucks(@RequestBody Account account, Double balance, @PathVariable Long userId)
     	throws AccountNotFoundException {
-    return userDAO.
+    	account.setUserId(userId);
+    	accountDAO.minusBucks(account, balance);
     }
-    
-    @RequestMapping(path = "{username}/account/addMoney", method = RequestMethod.PUT)
-    public void addMoney() {
     	
-    }
+//    @RequestMapping(path = "{username}/account/sendMoney", method = RequestMethod.PUT)
+//    public Account sendMoney(@RequestBody Account account, @PathVariable String username)
+//    	throws AccountNotFoundException {
+//    return userDAO.
+//    }
+//    
+//    @RequestMapping(path = "{username}/account/addMoney", method = RequestMethod.PUT)
+//    public void addMoney() {
+//    	
+//    }
     
 
 }

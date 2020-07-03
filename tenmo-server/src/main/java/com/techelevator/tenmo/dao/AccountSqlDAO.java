@@ -37,6 +37,16 @@ public class AccountSqlDAO implements AccountDAO{
         return a.getBalance();
 	}
 	
+	@Override
+	public Double minusBucks(Account account, Double balance) {
+		Long accountId = account.getAccountId();
+		SqlRowSet results = jdbcTemplate.queryForRowSet("UPDATE accounts SET balance = ?::numeric WHERE account_id = ?", double.class, balance, accountId);
+			if (results.next()) {
+				account = mapRowToAccount(results);
+			}
+		return account.getBalance();
+	}
+	
     @Override
     public List<Account> findAll() {
         List<Account> accounts = new ArrayList<>();

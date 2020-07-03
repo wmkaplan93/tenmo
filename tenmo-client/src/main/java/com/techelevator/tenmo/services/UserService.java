@@ -93,8 +93,11 @@ public class UserService {
     	return response;
     }
     
-    public boolean sendBucks(AuthenticatedUser currentUser, Double sendAmt, Long toUserId) {
+    public boolean sendBucks(AuthenticatedUser currentUser, Double sendAmt, Long toUserId) throws UserServiceException {
     	System.out.println("Great Googly Moogly");
+    	minusBucks(currentUser, sendAmt);
+    	System.out.println("Success!");
+    	System.out.println("New Balance: " + getUserBalance(currentUser));
     	System.exit(0);
     	
     	//call add bucks to destination user
@@ -122,10 +125,10 @@ public class UserService {
     	Account account = new Account();
     	try {
         	account.setUserId((long)user.getUser().getId());
-			account.setBalance(getUserBalance(user) - less);
+			account.setBalance(less);
 			account.setAccountId(getAccountId(user));
 			
-    		restTemplate.exchange(BASE_URL + user.getUser().getUsername() + "/account", HttpMethod.PUT, makeAccountEntity(account), Account.class);
+    		restTemplate.put(BASE_URL + user.getUser().getId() + "/account", makeAccountEntity(account));
 
 		} catch (UserServiceException e) {
 			e.getMessage();
@@ -181,10 +184,10 @@ public class UserService {
         return entity;
     }
     
-    private HttpEntity makeAccountEntity(Account account) {
+    private HttpEntity<Account> makeAccountEntity(Account account) {
     	HttpHeaders headers = new HttpHeaders();
     	headers.setContentType(MediaType.APPLICATION_JSON);
-    	HttpEntity entity = new HttpEntity<>(account);
+    	HttpEntity<Account> entity = new HttpEntity<>(account, headers);
     	return entity;
     }
 
