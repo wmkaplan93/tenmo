@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,10 +41,14 @@ public class AccountSqlDAO implements AccountDAO{
 	@Override
 	public Double minusBucks(Account account, Double balance) {
 		Long accountId = account.getAccountId();
-		SqlRowSet results = jdbcTemplate.queryForRowSet("UPDATE accounts SET balance = ?::numeric WHERE account_id = ?", double.class, balance, accountId);
-			if (results.next()) {
-				account = mapRowToAccount(results);
-			}
+//		Double newBalance = account.getBalance();
+		Double newBalance = balance;
+		String SQLupdate = "UPDATE accounts SET balance = ? WHERE account_id = ?";
+		jdbcTemplate.update(SQLupdate, newBalance, accountId);
+//		SqlRowSet results = jdbcTemplate.queryForRowSet("UPDATE accounts SET balance = ? WHERE account_id = ?", double.class, balance, accountId);
+//			if (results.next()) {
+//				account = mapRowToAccount(results);
+//			}
 		return account.getBalance();
 	}
 	

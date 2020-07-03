@@ -32,41 +32,54 @@ public class UserService {
         BASE_URL = url;
     }
 
-    public Double getUserBalance(AuthenticatedUser user) throws UserServiceException {
+    public Double getUserBalance(User user) throws UserServiceException {
     	
-
-        try {
-            Account account = restTemplate.exchange(BASE_URL + user.getUser().getUsername() + "/account", HttpMethod.GET, makeUserEntity(user), Account.class).getBody();
-            Double balance = account.getBalance();
-            return balance;
-         } catch (RestClientResponseException ex) {
-            throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
-        }
+        HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<User> entity = new HttpEntity<>(user, headers);
+		String userName = user.getUsername();
+		System.out.println("Username = " + userName);
+		Account account = restTemplate.exchange(BASE_URL + userName + "/account", HttpMethod.GET, entity, Account.class).getBody();
+		Double balance = account.getBalance();
+		return balance;
     }
     
-    public Long getAccountId(AuthenticatedUser user) throws UserServiceException {
+    public Long getAccountId(User user) throws UserServiceException {
     	
 
         try {
-            Account account = restTemplate.exchange(BASE_URL + user.getUser().getUsername() + "/account", HttpMethod.GET, makeUserEntity(user), Account.class).getBody();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<User> entity = new HttpEntity<>(user, headers);
+            Account account = restTemplate.exchange(BASE_URL + user.getUsername() + "/account", HttpMethod.GET, entity, Account.class).getBody();
             Long accountId = account.getAccountId();
             return accountId;
-         } catch (RestClientResponseException ex) {
+        } catch (RestClientResponseException ex) {
             throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
         }
     }
     
+//    public Long getForeignAccountId(User user) throws UserServiceException {
+//    	
+//
+//        try {
+//            Account account = restTemplate.exchange(BASE_URL + user.getUsername() + "/account", HttpMethod.GET, makeUserEntity(user), Account.class).getBody();
+//            Long accountId = account.getAccountId();
+//            return accountId;
+//         } catch (RestClientResponseException ex) {
+//            throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
+//        }
+//    }
     
-    public void listUsers() {
-//    	User thisUser = new User();
+    
+    
+    public Map<Long, String> listUsers() {
     	Map<Long, User> users = mapUsers();
-//    	List<User> userList = 
-		RestTemplate restTemplate = new RestTemplate();
 		System.out.println("------------------------------");
 		System.out.println("User ID          Username");
 		System.out.println("------------------------------");
+		Map<Long, String> newUsers = new HashMap<Long, String>();
 		for (Map.Entry<Long, User> entry : users.entrySet()) {
-			User thisUser = restTemplate.getForObject(BASE_URL + "mapUsers", User.class);
 			StringBuilder mapValueAsString = new StringBuilder();
 			mapValueAsString.append(entry.getValue());
 			String line = mapValueAsString.toString();
@@ -74,18 +87,16 @@ public class UserService {
 			Pattern p = Pattern.compile(pattern);
 			Matcher m = p.matcher(line);
 			if (m.find()) {
-				System.out.println(entry.getKey() + "                " + m.group(0));
+				System.out.println(entry.getKey() + "                " + m.group());
+				Long key = Long.parseLong(entry.getKey().toString());
+				newUsers.put(key, m.group());
 			} else {
 				System.out.println("No Match");
 			}
 			
 		}
-//		for (int i = 0; i < users.size(); i++) {
-////			thisUser.setId(users.get(users.keySet().toArray()[i]).getId());
-////			thisUser.setUsername(users.get(users.keySet().toArray()[i]).getUsername());
-//			System.out.println(users.keySet().toArray()[i] + "                " + users.get(users.keySet().toArray()[i]));
-//		}
 		System.out.println("------------------------------");
+		return newUsers;
     }
     
     public Map<Long, User> mapUsers() {
@@ -93,11 +104,13 @@ public class UserService {
     	return response;
     }
     
-    public boolean sendBucks(AuthenticatedUser currentUser, Double sendAmt, Long toUserId) throws UserServiceException {
-    	System.out.println("Great Googly Moogly");
-    	minusBucks(currentUser, sendAmt);
-    	System.out.println("Success!");
-    	System.out.println("New Balance: " + getUserBalance(currentUser));
+    public boolean sendBucks(AuthenticatedUser currentUser, Double sendAmt, Long toUserId, String toUserName) throws UserServiceException {
+    	Double lessAmt = getUserBalance(currentUser.getUser()) - sendAmt;
+    	minusBucks(currentUser, lessAmt);
+    	Integer intUserId = Integer.parseInt(toUserId.toString());
+    	addBucks(sendAmt, intUserId, toUserName);
+       	System.out.println("Success!");
+    	System.out.println("New Balance: " + getUserBalance(currentUser.getUser()));
     	System.exit(0);
     	
     	//call add bucks to destination user
@@ -108,27 +121,34 @@ public class UserService {
 		return false;	
     }
     
-    //add money to account balance
-//    public Account minusAccount(AuthenticatedUser user, double less) {
-//    	Account account = new Account();
-//    	try {
-//        	account.setUserId((long)user.getUser().getId());
-//			account.setBalance(getUserBalance(user) - less);
-//			account.setAccountId(getAccountId(user));
-//		} catch (UserServiceException e) {
-//			e.getMessage();
-//		}
-//		return account;
-//    }
-    
-    public Account minusBucks(AuthenticatedUser user, double less) {
+    public boolean addBucks (Double sendAmt, Integer toUserId, String toUserName) throws UserServiceException {
     	Account account = new Account();
+    	User thisUser = new User();
+    	thisUser.setId(toUserId);
+    	thisUser.setUsername(toUserName);
+    	Long userId = (long)toUserId;
+    	Double balance = getUserBalance(thisUser) + sendAmt;
+    	
     	try {
-        	account.setUserId((long)user.getUser().getId());
-			account.setBalance(less);
-			account.setAccountId(getAccountId(user));
+    		account.setUserId(userId);
+    		account.setBalance(balance);
+    		account.setAccountId(getAccountId(thisUser));
+    	} catch (UserServiceException e) {
+    		e.getMessage();
+    	}
+    	return false;
+    }
+    
+    
+    public Account minusBucks(AuthenticatedUser user, double balance) {
+    	Account account = new Account();
+    	User thisUser = user.getUser();
+       	try {
+        	account.setUserId((long)thisUser.getId());
+			account.setBalance(balance);
+			account.setAccountId(getAccountId(thisUser));
 			
-    		restTemplate.put(BASE_URL + user.getUser().getId() + "/account", makeAccountEntity(account));
+    		restTemplate.put(BASE_URL + thisUser.getId() + "/account", makeAccountEntity(account));
 
 		} catch (UserServiceException e) {
 			e.getMessage();
@@ -136,37 +156,7 @@ public class UserService {
     	
     	return account;
     }
-//    public Location update(String CSV) throws LocationServiceException {
-//        Location location = makeLocation(CSV);
-//        try {
-//            restTemplate.exchange(BASE_URL + "/" + location.getId(), HttpMethod.PUT, makeLocationEntity(location), Location.class);
-//        } catch (RestClientResponseException ex) {
-//            throw new LocationServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
-//        }
-//        return location;
-//    }
-    
-    // register user using name/pw
-//    public void register(UserCredentials credentials) throws AuthenticationServiceException {
-//    	HttpEntity<UserCredentials> entity = createRequestEntity(credentials);
-//        sendRegistrationRequest(entity);
-//    }
-    
-    //subtract money from account balance
-    
-//	public CatFact getFact() {
-//	RestTemplate restTemplate = new RestTemplate();
-//	CatFact catFact = restTemplate.getForObject("https://cat-fact.herokuapp.com/facts/random", CatFact.class);
-//
-//	return catFact;
-//}
-//	public String getUsername(Map<Long, User> userMap) {
-//		RestTemplate restTemplate = new RestTemplate();
-//		for (Map.Entry<Long, User> entry : userMap.entrySet()) {
-//			String username = restTemplate.getForObject(BASE_URL + entry.getValue(), String.class);
-//		}
-//		
-//	}
+
 		
 	
     private HttpEntity<AuthenticatedUser> makeUserEntity(AuthenticatedUser user) {

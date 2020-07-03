@@ -20,4 +20,9 @@ public class User {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+	
+	public String usernameFromId (Integer toUserId) {
+		String userName = getUsername();
+		return userName;
+	}
 }
