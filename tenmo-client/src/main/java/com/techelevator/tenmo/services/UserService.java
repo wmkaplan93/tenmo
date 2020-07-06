@@ -37,30 +37,35 @@ public class UserService {
         BASE_URL = url;
     }
 
-    public Double getUserBalance(User user) throws UserServiceException {
+    public Double getUserBalance(AuthenticatedUser user) throws UserServiceException {
     	
-        HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<User> entity = new HttpEntity<>(user, headers);
-		String userName = user.getUsername();
-		Account account = restTemplate.exchange(BASE_URL + userName + "/account", HttpMethod.GET, entity, Account.class).getBody();
+//        HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//		HttpEntity<User> entity = new HttpEntity<>(user, headers);
+		String userName = user.getUser().getUsername();
+		Account account = restTemplate.exchange(BASE_URL + userName + "/account", HttpMethod.GET, makeAuthEntity(user), Account.class).getBody();
 		Double balance = account.getBalance();
 		return balance;
     }
     
-    public Long getAccountId(User user) throws UserServiceException {
-    	
+    public Double getUnAuthUserBalance(User user) throws UserServiceException {
+		Account account = restTemplate.exchange(BASE_URL + user.getId() + "/account/balance", HttpMethod.GET, makeUserEntity(user), Account.class).getBody();
+		Double balance = account.getBalance();
+		return balance;
+    }
+    
+    public Long getAccountIdFromUser(AuthenticatedUser user) throws UserServiceException {
 
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<User> entity = new HttpEntity<>(user, headers);
-            Account account = restTemplate.exchange(BASE_URL + user.getUsername() + "/account", HttpMethod.GET, entity, Account.class).getBody();
-            Long accountId = account.getAccountId();
-            return accountId;
-        } catch (RestClientResponseException ex) {
-            throw new UserServiceException(ex.getRawStatusCode() + " : " + ex.getResponseBodyAsString());
-        }
+        Account account = restTemplate.exchange(BASE_URL + user.getUser().getUsername() + "/account", HttpMethod.GET, makeAuthEntity(user), Account.class).getBody();
+        Long accountId = account.getAccountId();
+        return accountId;
+    }
+    
+    public Long getUnAuthAccountIdFromUser(User user) throws UserServiceException {
+
+        Account account = restTemplate.exchange(BASE_URL + user.getId() + "/account/balance", HttpMethod.GET, makeUserEntity(user), Account.class).getBody();
+        Long accountId = account.getAccountId();
+        return accountId;
     }
     
     public String getUsernameFromAccountId(long accountId) {
@@ -72,8 +77,8 @@ public class UserService {
     }
 
     
-	   public Map<String, String> listUsers() {
-	    	Map<Long, User> users = mapUsers();
+	   public Map<String, String> listUsers(AuthenticatedUser user) {
+	    	Map<Long, User> users = mapUsers(user);
 			System.out.println("------------------------------");
 			System.out.println("User ID          Username");
 			System.out.println("------------------------------");
@@ -102,13 +107,14 @@ public class UserService {
 		return newUsers;
     }
     
-    public Map<Long, User> mapUsers() {
+	   
+    public Map<Long, User> mapUsers(AuthenticatedUser user) {
     	Map<Long, User> response = restTemplate.getForObject(BASE_URL + "mapUsers", Map.class);
     	return response;
     }
     
     public void sendBucks(AuthenticatedUser currentUser, Double sendAmt, Long toUserId, String toUserName) throws UserServiceException {
-    	Double lessAmt = getUserBalance(currentUser.getUser()) - sendAmt;
+    	Double lessAmt = getUserBalance(currentUser) - sendAmt;
     	minusBucks(currentUser, lessAmt);
     	
     	Integer intUserId = Integer.parseInt(toUserId.toString());
@@ -118,25 +124,24 @@ public class UserService {
     	
     	addBucks(sendAmt, thisUser);
        	System.out.println("Success!");
-    	System.out.println("New Balance: " + getUserBalance(currentUser.getUser()));
-    	logSend(getAccountId(currentUser.getUser()), getAccountId(thisUser), sendAmt);
+    	System.out.println("New Balance: " + getUserBalance(currentUser));
+    	logSend(getAccountIdFromUser(currentUser), getUnAuthAccountIdFromUser(thisUser), sendAmt);
     }
-    
-    public boolean addBucks (Double sendAmt, User user) throws UserServiceException {
+
+	public void addBucks (Double sendAmt, User user) throws UserServiceException {
     	Account account = new Account();
     	Long userId = (long) user.getId();
-    	Double balance = getUserBalance(user) + sendAmt;
+    	Double balance = getUnAuthUserBalance(user) + sendAmt;
     	
     	try {
     		account.setUserId(userId);
     		account.setBalance(balance);
-    		account.setAccountId(getAccountId(user));
+    		account.setAccountId(getUnAuthAccountIdFromUser(user));
     		
     		restTemplate.put(BASE_URL + user.getId() + "/account", makeAccountEntity(account));
     	} catch (UserServiceException e) {
-    		e.getMessage();
+    		e.printStackTrace();
     	}
-    	return false;
     }
     
     
@@ -146,7 +151,7 @@ public class UserService {
        	try {
         	account.setUserId((long)thisUser.getId());
 			account.setBalance(balance);
-			account.setAccountId(getAccountId(thisUser));
+			account.setAccountId(getUnAuthAccountIdFromUser(thisUser));
 			
     		restTemplate.put(BASE_URL + thisUser.getId() + "/account", makeAccountEntity(account));
 
@@ -168,7 +173,7 @@ public class UserService {
     
     public Transfer[] myTransfers(AuthenticatedUser user) {
     	Transfer[] myTransfers = null;
-    	myTransfers = restTemplate.exchange(BASE_URL + user.getUser().getUsername() + "/myTransfers", HttpMethod.GET, makeUserEntity(user), Transfer[].class).getBody();
+    	myTransfers = restTemplate.exchange(BASE_URL + user.getUser().getUsername() + "/myTransfers", HttpMethod.GET, makeAuthEntity(user), Transfer[].class).getBody();
     	System.out.println("-------------------------------");
     	System.out.println("---        Transfers        ---");
     	System.out.println("---                         ---");
@@ -204,7 +209,6 @@ public class UserService {
     }
     
     public void transferDetails(Transfer transfer) {
-//    	restTemplate.exchange(BASE_URL + "transfers/{transferId}", HttpMethod.GET, makeTransferEntity(transfer), Transfer.class).getBody();
     	System.out.println("----------------------------");
     	System.out.println("---   Transfer Details   ---");
     	System.out.println("----------------------------");
@@ -227,21 +231,22 @@ public class UserService {
     	}
     	System.out.println("Amount: $" + transfer.getAmount());
     }
-
-		
+    
+//    public void allTransferDetails(Transfer transfer) {
+//    	restTemplate.exchange(BASE_URL + "transfers/{transferId}", HttpMethod.GET, makeTransferEntity(transfer), Transfer.class).getBody();
+//    }	
 	
-    private HttpEntity<AuthenticatedUser> makeUserEntity(AuthenticatedUser user) {
+    private HttpEntity<User> makeUserEntity(User user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(user.getToken());
-        HttpEntity<AuthenticatedUser> entity = new HttpEntity<>(user, headers);
+        HttpEntity<User> entity = new HttpEntity<>(user, headers);
         return entity;
     }
 	
-    private HttpEntity makeAuthEntity(AuthenticatedUser user) {
+    private HttpEntity<AuthenticatedUser> makeAuthEntity(AuthenticatedUser user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(user.getToken());
-        HttpEntity entity = new HttpEntity<>(headers);
+        HttpEntity<AuthenticatedUser> entity = new HttpEntity<>(headers);
         return entity;
     }
     

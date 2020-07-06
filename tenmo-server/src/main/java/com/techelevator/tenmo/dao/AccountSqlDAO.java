@@ -39,16 +39,12 @@ public class AccountSqlDAO implements AccountDAO{
 	}
 	
 	@Override
-	public Double minusBucks(Account account, Double balance) {
+	public Double changeBucks(Account account, Double balance) {
 		Long accountId = account.getAccountId();
 //		Double newBalance = account.getBalance();
 		Double newBalance = balance;
 		String SQLupdate = "UPDATE accounts SET balance = ? WHERE account_id = ?";
 		jdbcTemplate.update(SQLupdate, newBalance, accountId);
-//		SqlRowSet results = jdbcTemplate.queryForRowSet("UPDATE accounts SET balance = ? WHERE account_id = ?", double.class, balance, accountId);
-//			if (results.next()) {
-//				account = mapRowToAccount(results);
-//			}
 		return account.getBalance();
 	}
 	
@@ -67,7 +63,7 @@ public class AccountSqlDAO implements AccountDAO{
     }
 
     @Override
-    public Account returnAccountByUsername(int userId) throws AccountNotFoundException {
+    public Account returnAccountByUserId(long userId) throws AccountNotFoundException {
         for (Account account : this.findAll()) {
             if( account.getUserId() == userId) {
                 return account;

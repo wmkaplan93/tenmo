@@ -80,7 +80,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewCurrentBalance() {
 		try {
-			System.out.println("Current Balance: " + userService.getUserBalance(currentUser.getUser()));
+			System.out.println("Current Balance: " + userService.getUserBalance(currentUser));
 		} catch (UserServiceException e) {
 			System.out.println("User Service Excepton");
 		} catch (NullPointerException e) {
@@ -98,8 +98,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void sendBucks(AuthenticatedUser user) throws UserServiceException {
-    	Map<String, String> newUsers = userService.listUsers();
-    	Map<Long, User> mapUsers = userService.mapUsers();
+    	Map<String, String> newUsers = userService.listUsers(user);
+    	Map<Long, User> mapUsers = userService.mapUsers(user);
     	System.out.println("Please select a User ID to send TE Bucks to (1, 2, etc): ");
     	String userIn = console.getUserInput("User ID: ");
     	if(mapUsers.containsKey(userIn)) {
@@ -108,11 +108,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     			sendBucks(user);
     		} else {
     			String userName = newUsers.get(userIn);
-	    		Double sendAmt = 99999999.9;
-	    		while (sendAmt > userService.getUserBalance(currentUser.getUser()) || sendAmt <= 0) {
-	    			System.out.println("Current balance: " + userService.getUserBalance(currentUser.getUser()));
+	    		Double sendAmt = 999999999999.9;
+	    		while (sendAmt > userService.getUserBalance(currentUser) || sendAmt <= 0) {
+	    			System.out.println("Current balance: " + userService.getUserBalance(currentUser));
 	    			sendAmt = Double.parseDouble(console.getUserInput("How much would you like to send? (100, 250, etc) "));
-	        		if (sendAmt > userService.getUserBalance(currentUser.getUser())) {
+	        		if (sendAmt > userService.getUserBalance(currentUser)) {
 	        			System.out.println("Please enter an amount less than or equal to your current balance.");
 	        		} else if (sendAmt <= 0) {
 	        			System.out.println("Please enter an amount greater than 0.");
@@ -120,8 +120,10 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	        			//Double lessAmt = userService.getUserBalance(currentUser.getUser()) - sendAmt;
 //	        			Double moreAmt = userService.getUserBalance(user)
 	        			long toUserId = Long.parseLong(userIn);
-	            		userService.sendBucks(currentUser, sendAmt, toUserId, userName);
+	        			userService.sendBucks(currentUser, sendAmt, toUserId, userName);
+	        			sendAmt = 0.000000001;
 	        		}
+	        		
 	    		}
     		}
     	} else {
