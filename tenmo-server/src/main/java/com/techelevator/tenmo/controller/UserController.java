@@ -22,7 +22,7 @@ import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.security.jwt.TokenProvider;
 
 @RestController
-@PreAuthorize("permitAll()")
+//@PreAuthorize("isAuthenticated()")
 public class UserController {
 	
     private final TokenProvider tokenProvider;
@@ -38,53 +38,69 @@ public class UserController {
         this.transferDAO = transferDAO;
     }
     
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(path = "{username}/", method = RequestMethod.GET)
     public User getUserByUsername(@PathVariable String username) {
     	return userDAO.findByUsername(username);
     }
-      
+    
+    @PreAuthorize("permitAll()")
     @RequestMapping(path = "{username}/account", method = RequestMethod.GET)
     public Account getUserAccount(@PathVariable String username) throws AccountNotFoundException {
-    	return accountDAO.returnAccountByUsername(userDAO.findIdByUsername(username));
+    	return accountDAO.returnAccountByUserId(userDAO.findIdByUsername(username));
     }
-        
+    
+    @PreAuthorize("permitAll()")
+    @RequestMapping(path = "{userId}/account/balance", method = RequestMethod.GET)
+    public Account getUnAuthAccount(@PathVariable Long userId) throws AccountNotFoundException {
+    	return accountDAO.returnAccountByUserId(Integer.parseInt(userId.toString()));
+    }
+    
+    @PreAuthorize("permitAll()")
     @RequestMapping(path = "account/{accountId}", method = RequestMethod.GET)
     public String getAccountFromAccountId(@PathVariable long accountId) throws AccountNotFoundException {
     	String username = userDAO.usernameFromAccountId(accountId);
     	return username;
     }
     
+    @PreAuthorize("permitAll()")
     @RequestMapping(path = "mapUsers", method = RequestMethod.GET)
     public Map<Long, User> mapUsers() {
     	Map<Long, User> userMap = userDAO.findAllMap();
     	return userMap;
     }
     
+    @PreAuthorize("permitAll()")
     @RequestMapping(path = "{userId}/account", method = RequestMethod.PUT)
     public void changeBucks(@RequestBody Account account, @PathVariable Long userId)
     	throws AccountNotFoundException {
     	account.setUserId(userId);
     	Double balance = account.getBalance();
-    	accountDAO.minusBucks(account, balance);
+    	accountDAO.changeBucks(account, balance);
     }
     
+
+    
+    @PreAuthorize("permitAll()")
     @RequestMapping(path = "transfers", method = RequestMethod.POST) 
     public void logTransfer(@RequestBody Transfer transfer) {
-    	Long accountFrom = (long) transfer.getAccountFrom();
-    	Long accountTo = (long) transfer.getAccountTo();
-    	Double amount = transfer.getAmount();
-    	transferDAO.logSend(accountFrom, accountTo, amount);
+//    	Long accountFrom = (long) transfer.getAccountFrom();
+//    	Long accountTo = (long) transfer.getAccountTo();
+//    	Double amount = transfer.getAmount();
+    	transferDAO.logSend(transfer);
     }
     
+    @PreAuthorize("permitAll()")
     @RequestMapping(path = "transfers/{transferId}", method = RequestMethod.GET)
     public Transfer transferDetails(@PathVariable int transferId) {
     	return transferDAO.transferDetails(transferId);
     	
     }
     
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(path = "{username}/myTransfers", method = RequestMethod.GET)
     public List<Transfer> myTransfers(@PathVariable String username) throws AccountNotFoundException {
-    	long myAccountId = accountDAO.returnAccountByUsername(userDAO.findIdByUsername(username)).getAccountId();
+    	long myAccountId = accountDAO.returnAccountByUserId(userDAO.findIdByUsername(username)).getAccountId();
     	return transferDAO.myTransfers(myAccountId);
     }
 

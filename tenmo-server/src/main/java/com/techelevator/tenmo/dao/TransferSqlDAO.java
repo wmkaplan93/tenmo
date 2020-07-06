@@ -24,10 +24,10 @@ public class TransferSqlDAO implements TransferDAO {
 	
 	//post new transfer to table
 	@Override
-	public void logSend(long accountFrom, long accountTo, double amount) {
+	public void logSend(Transfer transfer) {
 		String sql = "INSERT INTO transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) "
 				+ "VALUES (2, 2, ?, ?, ?)";
-		jdbcTemplate.update(sql, accountFrom, accountTo, amount);
+		jdbcTemplate.update(sql, transfer.getAccountFrom(), transfer.getAccountTo(), transfer.getAmount());
 	}
 	
 	//return list of transfers I'm involved in

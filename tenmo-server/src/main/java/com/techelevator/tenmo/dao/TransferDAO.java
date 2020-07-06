@@ -6,7 +6,7 @@ import com.techelevator.tenmo.model.Transfer;
 
 public interface TransferDAO {
 
-	void logSend(long accountFrom, long accountTo, double amount);
+	void logSend(Transfer transfer);
 
 	List<Transfer> myTransfers(long myAccountId);
 
